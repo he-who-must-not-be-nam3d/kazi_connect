@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 
 from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
@@ -9,6 +10,7 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
+from django.utils.timezone import now
 
 from main.forms import JobListingForm, RegistrationForm, SkillsInputForm, JobApplicationForm
 from main.models import JobListing, JobSeekerProfile, JobApplication, UserProfile
@@ -27,7 +29,7 @@ def home(request):
 def dashboard(request):
     try:
         user_profile = UserProfile.objects.get(user=request.user)
-
+        alerts = get_alerts(request)
         # Check if the user is a job seeker
         if user_profile.user_type == 'job_seeker':
             # Fetch the JobSeekerProfile instance
@@ -281,6 +283,7 @@ def update_status(request):
         if application.job.employer == request.user:
             # Update the status and save
             application.status = new_status
+            application.last_status_update = now()
             application.save()
 
             # Add a message to confirm success (optional)
@@ -293,4 +296,46 @@ def update_status(request):
             return redirect('applications')  # Redirect back to the applications page
 
 
-        return redirect('applications')
+    return redirect('applications')
+
+@login_required
+def get_alerts(request):
+    notifications = []
+    notifications_count = 0
+
+    if request.user.is_authenticated:
+        try:
+            user_profile = UserProfile.objects.get(user=request.user)
+        except UserProfile.DoesNotExist:
+            user_profile = None
+
+        if user_profile:
+            if user_profile.user_type == 'employer':
+                # Fetch notifications for new applications
+                job_listings = JobListing.objects.filter(employer=request.user)
+                for job in job_listings:
+                    new_applications = JobApplication.objects.filter(job=job, status='new')
+                    for application in new_applications:
+                        notifications.append({
+                            'type': 'new_application',
+                            'date': application.applied_at.strftime("%B %d, %Y"),
+                            'message': f"New application for {job.title} by {application.applicant.username}!",
+                        })
+                notifications_count += len(notifications)
+
+            elif user_profile.user_type == 'job_seeker':
+                # Fetch notifications for job seekers based on status change
+                applications = JobApplication.objects.filter(applicant=request.user)
+                for application in applications:
+                    if application.status_changed():
+                        notifications.append({
+                            'type': 'status_change',
+                            'date': application.last_status_update.strftime("%B %d, %Y"),
+                            'message': f"Your application for {application.job.title} is now {application.status}.",
+                        })
+                notifications_count += len(notifications)
+
+    return {
+        'notifications': notifications,
+        'notifications_count': notifications_count,
+    }

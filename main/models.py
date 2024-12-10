@@ -52,6 +52,10 @@ class JobApplication(models.Model):
     cover_letter = models.TextField()
     cv = models.FileField(upload_to='cvs/')
     applied_at = models.DateTimeField(auto_now_add=True)
+    last_status_update = models.DateTimeField(auto_now=True)
+
+    def status_changed(self):
+        return self.last_status_update > self.applied_at
 
     def __str__(self):
         return f"{self.full_name} ({self.email}) - {self.job.title}"
