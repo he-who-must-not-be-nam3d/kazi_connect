@@ -1,0 +1,33 @@
+{% extends 'layout.html' %}
+{% load crispy_forms_filters %}
+
+{% block title %}
+	<title>Details</title>
+{% endblock %}
+
+
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">{{ job.title }}</h1>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">{{ job.company_name }}</h5>
+            <p><strong>Location:</strong> {{ job.location }}</p>
+            <p><strong>Employment Type:</strong> {{ job.employment_type }}</p>
+            <p><strong>Description:</strong></p>
+            <p>{{ job.description }}</p>
+            <p><strong>Required Skills:</strong> {{ job.skills }}</p>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between">
+        {% if is_job_seeker %}
+            <a href="{% url 'apply' job.id %}" class="btn btn-success">Apply Now</a>
+        {% elif is_employer and owns_listing %}
+            <a href="{% url 'manage' job.id %}" class="btn btn-primary">Edit Listing</a>
+            <a href="{% url 'delete_listing' job.id %}" class="btn btn-danger">Delete Listing</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

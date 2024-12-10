@@ -1,0 +1,18 @@
+{% extends 'layout.html' %}
+{% load crispy_forms_filters %}
+
+{% block title %}
+	<title>Create Job Listing</title>
+{% endblock %}
+
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Create Job Listing</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-primary">Create</button>
+    </form>
+</div>
+{% endblock %}

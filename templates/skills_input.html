@@ -1,0 +1,16 @@
+{% extends 'layout.html' %}
+{% load crispy_forms_filters %}
+
+{% block title %}
+	<title>Skills Input</title>
+{% endblock %}
+
+
+{% block content %}
+<h2>Enter Your Skills</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form|crispy }}
+    <button type="submit" class="btn btn-primary">Submit Skills</button>
+</form>
+{% endblock %}
