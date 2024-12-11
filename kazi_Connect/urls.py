@@ -36,6 +36,7 @@ urlpatterns = [
     path('listings/<int:id>/delete/', views.delete_listing, name='delete_listing'),
     path('applications', views.applications, name='applications'),
     path('applications/update_status/', views.update_status, name='update_status'),
+    path('listings/search/', views.job_search, name='job_search'),
     path('admin/', admin.site.urls),
 ]
 

@@ -1,0 +1,43 @@
+{% extends 'layout.html' %}
+{% load crispy_forms_filters %}
+
+{% block title %}
+    <title>Search Results</title>
+{% endblock %}
+{% block content %}
+    <div class="container">
+        {% if query %}
+    <h2 class="mb-4">Search Results for "{{ query }}"</h2>
+
+    {% if jobs %}
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for job in jobs %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        {% if job.company_logo %}
+                            <img src="{{ job.company_logo.url }}" class="card-img-top" alt="{{ job.company_name }} logo">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ job.title }}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">{{ job.company_name }}</h6>
+                            <p class="card-text">
+                                <strong>Location:</strong> {{ job.location }}<br>
+                                <strong>Type:</strong> {{ job.employment_type }}
+                            </p>
+                            <p class="card-text">{{ job.description|truncatewords:30 }}</p>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 pb-3">
+                            <a href="{% url 'details' job.id %}" class="btn btn-primary w-100">Apply Now</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            No jobs found matching your search.
+        </div>
+    {% endif %}
+{% endif %}
+    </div>
+{% endblock %}

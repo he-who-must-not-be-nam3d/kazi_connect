@@ -6,7 +6,7 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
@@ -339,3 +339,26 @@ def get_alerts(request):
         'notifications': notifications,
         'notifications_count': notifications_count,
     }
+
+# @login_required
+def job_search(request):
+    query = request.GET.get('query', '').strip()
+
+    if query:
+        # Comprehensive search across multiple fields
+        jobs = JobListing.objects.filter(
+            Q(title__icontains=query) |
+            Q(description__icontains=query) |
+            Q(company_name__icontains=query) |
+            Q(location__icontains=query) |
+            Q(skills__icontains=query)
+        )
+    else:
+        # If no query, show all jobs or none
+        jobs = JobListing.objects.all()
+
+    context = {
+        'jobs': jobs,
+        'query': query
+    }
+    return render(request, 'job_search_results.html', context)
